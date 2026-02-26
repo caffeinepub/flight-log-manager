@@ -9,9 +9,9 @@ import Float "mo:core/Float";
 import Text "mo:core/Text";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   // Data Types
   public type Student = {

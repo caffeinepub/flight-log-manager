@@ -36,6 +36,7 @@ import {
   useGetAllInstructors,
   useGetAllAircraft,
   useGetAllExercises,
+  useGetAllFlightLogs,
   useGetAllUsersWithProfiles,
   useAssignUserRole,
 } from "../hooks/useQueries";
@@ -49,19 +50,38 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
+  Download,
+  HardDrive,
 } from "lucide-react";
 import { UserRole } from "../backend";
 import type { AdminUserInfo } from "../backend";
+import { exportAllDataToExcel } from "../utils/xlsxExport";
 
 export default function AdminPanelPage() {
   const { data: students, isLoading: studentsLoading } = useGetAllStudents();
   const { data: instructors, isLoading: instructorsLoading } = useGetAllInstructors();
   const { data: aircraft, isLoading: aircraftLoading } = useGetAllAircraft();
   const { data: exercises, isLoading: exercisesLoading } = useGetAllExercises();
+  const { data: flightLogs, isLoading: flightLogsLoading } = useGetAllFlightLogs();
   const { data: usersWithProfiles, isLoading: usersLoading } = useGetAllUsersWithProfiles();
   const assignUserRole = useAssignUserRole();
 
   const [changingRoleFor, setChangingRoleFor] = useState<string | null>(null);
+
+  const isBackupLoading =
+    studentsLoading || instructorsLoading || aircraftLoading || exercisesLoading || flightLogsLoading;
+
+  const handleExportAllData = () => {
+    exportAllDataToExcel(
+      students ?? [],
+      instructors ?? [],
+      aircraft ?? [],
+      exercises ?? [],
+      flightLogs ?? [],
+      `flight_school_backup_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
+    toast.success("Backup exported successfully");
+  };
 
   // Count admins to prevent removing the last admin
   const adminCount = useMemo(() => {
@@ -200,6 +220,75 @@ export default function AdminPanelPage() {
           />
         </div>
       </div>
+
+      {/* Data Backup & Recovery Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <HardDrive className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="font-display text-xl">Data Backup &amp; Recovery</CardTitle>
+              <CardDescription>
+                Download a complete backup of all flight school data as an Excel file
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">
+                Exports all students, instructors, aircraft, exercises, and flight logs into a
+                single Excel file with separate sheets for each data type. Use this to create
+                regular backups or migrate data.
+              </p>
+              {!isBackupLoading && (
+                <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {students?.length ?? 0} students
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <UserCheck className="h-3 w-3" />
+                    {instructors?.length ?? 0} instructors
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Plane className="h-3 w-3" />
+                    {aircraft?.length ?? 0} aircraft
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" />
+                    {exercises?.length ?? 0} exercises
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Download className="h-3 w-3" />
+                    {flightLogs?.length ?? 0} flight logs
+                  </span>
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={handleExportAllData}
+              disabled={isBackupLoading}
+              className="gap-2 shrink-0"
+            >
+              {isBackupLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading data…
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Export All Data to Excel
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* User Management Section */}
       <Card>

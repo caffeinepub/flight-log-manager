@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSaveCallerUserProfile, useIsCallerAdmin } from "../hooks/useQueries";
+import { useCreateOrGetProfile, useIsCallerAdmin } from "../hooks/useQueries";
 import { toast } from "sonner";
 import { Loader2, Shield, Sparkles } from "lucide-react";
 import { useActor } from "../hooks/useActor";
@@ -56,7 +56,7 @@ export default function ProfileSetup({ open }: ProfileSetupProps) {
   const [name, setName] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
-  const saveProfile = useSaveCallerUserProfile();
+  const saveProfile = useCreateOrGetProfile();
   const { data: isAdmin, refetch: refetchAdmin } = useIsCallerAdmin();
   const { actor } = useActor();
   const queryClient = useQueryClient();

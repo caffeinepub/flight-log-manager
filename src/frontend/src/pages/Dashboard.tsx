@@ -151,8 +151,8 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentFlights.map((log, index) => (
-                    <TableRow key={index}>
+                  {recentFlights.map((log) => (
+                    <TableRow key={log.id.toString()}>
                       <TableCell className="whitespace-nowrap">
                         {log.date}
                       </TableCell>

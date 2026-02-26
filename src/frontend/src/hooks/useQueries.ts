@@ -21,7 +21,11 @@ export function useGetAllStudents() {
     queryKey: ["students"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllStudents();
+      try {
+        return await actor.getAllStudents();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -83,7 +87,11 @@ export function useGetAllInstructors() {
     queryKey: ["instructors"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllInstructors();
+      try {
+        return await actor.getAllInstructors();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -145,7 +153,11 @@ export function useGetAllAircraft() {
     queryKey: ["aircraft"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllAircrafts();
+      try {
+        return await actor.getAllAircrafts();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -208,7 +220,11 @@ export function useGetAllExercises() {
     queryKey: ["exercises"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllExercises();
+      try {
+        return await actor.getAllExercises();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -270,7 +286,11 @@ export function useGetAllFlightLogs() {
     queryKey: ["flightLogs"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllFlightLogs();
+      try {
+        return await actor.getAllFlightLogs();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -370,7 +390,11 @@ export function useGetDailySummary(date: string) {
     queryKey: ["dailySummary", date],
     queryFn: async () => {
       if (!actor) throw new Error("Actor not available");
-      return actor.getDailySummary(date);
+      try {
+        return await actor.getDailySummary(date);
+      } catch {
+        return { date, totalFlights: 0n, totalHours: 0 };
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -382,7 +406,11 @@ export function useGetMonthlySummary(month: string) {
     queryKey: ["monthlySummary", month],
     queryFn: async () => {
       if (!actor) throw new Error("Actor not available");
-      return actor.getMonthlySummary(month);
+      try {
+        return await actor.getMonthlySummary(month);
+      } catch {
+        return { month, totalFlights: 0n, totalHours: 0 };
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -394,7 +422,11 @@ export function useGetAircraftHours() {
     queryKey: ["aircraftHours"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getTotalHoursPerAircraft();
+      try {
+        return await actor.getTotalHoursPerAircraft();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -408,7 +440,12 @@ export function useGetCallerUserProfile() {
     queryKey: ["currentUserProfile"],
     queryFn: async () => {
       if (!actor) throw new Error("Actor not available");
-      return actor.getCallerUserProfile();
+      try {
+        return await actor.getCallerUserProfile();
+      } catch {
+        // New user who has no role yet - treat as no profile
+        return null;
+      }
     },
     enabled: !!actor && !actorFetching,
     retry: false,
@@ -436,6 +473,21 @@ export function useSaveCallerUserProfile() {
   });
 }
 
+export function useCreateOrGetProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (name: string) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createOrGetProfile({ name });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+    },
+  });
+}
+
 // ============= Admin Check =============
 export function useIsCallerAdmin() {
   const { actor, isFetching } = useActor();
@@ -443,7 +495,11 @@ export function useIsCallerAdmin() {
     queryKey: ["isAdmin"],
     queryFn: async () => {
       if (!actor) return false;
-      return actor.isCallerAdmin();
+      try {
+        return await actor.isCallerAdmin();
+      } catch {
+        return false;
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -456,7 +512,11 @@ export function useGetAllUsersWithProfiles() {
     queryKey: ["allUsersWithProfiles"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllUsersWithProfiles();
+      try {
+        return await actor.getAllUsersWithProfiles();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
